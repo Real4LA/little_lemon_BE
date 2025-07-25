@@ -1,0 +1,72 @@
+{% load static %}
+<header>
+  <img src="{% static 'img/logo.png' %}" />
+</header>
+<nav>
+  <ul>
+    <li><a href="{% url 'home' %}">Home</a></li>
+    <li><a href="{% url 'about' %}">About</a></li>
+    <li><a href="{% url 'menu' %}">Menu</a></li>
+    <li><a href="{% url 'book' %}">Book</a></li>
+    <li>
+      <a href="#" onclick="loadReservations(); return false;">Reservations</a>
+    </li>
+    <li id="nav-login"><a href="/login/">Login</a></li>
+    <li id="nav-register"><a href="/register/">Register</a></li>
+    <li id="nav-logout" style="display: none">
+      <a href="#" onclick="logoutUser()">Logout</a>
+    </li>
+  </ul>
+</nav>
+<script>
+  function updateNavAuth() {
+    if (localStorage.getItem("access")) {
+      document.getElementById("nav-login").style.display = "none";
+      document.getElementById("nav-register").style.display = "none";
+      document.getElementById("nav-logout").style.display = "";
+    } else {
+      document.getElementById("nav-login").style.display = "";
+      document.getElementById("nav-register").style.display = "";
+      document.getElementById("nav-logout").style.display = "none";
+    }
+  }
+
+  function loadReservations() {
+    if (!localStorage.getItem("access")) {
+      window.location.href = "/login/";
+      return;
+    }
+
+    // Change the URL to show /reservations/
+    window.history.pushState({}, "", "/reservations/");
+
+    // Load reservations content via JavaScript
+    fetch('{% url "reservations" %}', {
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("access"),
+        "Content-Type": "application/json",
+      },
+    })
+      .then((r) => r.json())
+      .then((bookings) => {
+        // Create a simple display of the reservations
+        const content = `
+          <h1>All Reservations</h1>
+          <pre>${JSON.stringify(bookings, null, 2)}</pre>
+        `;
+        document.querySelector("main").innerHTML = content;
+      })
+      .catch((error) => {
+        console.error("Error loading reservations:", error);
+        alert("Error loading reservations. Please try again.");
+      });
+  }
+
+  function logoutUser() {
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+    updateNavAuth();
+    window.location.href = "/login/";
+  }
+  updateNavAuth();
+</script>

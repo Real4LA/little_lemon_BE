@@ -1,0 +1,78 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+<section>
+  <article>
+    <h1>All Reservations</h1>
+    <!--Begin row-->
+    <div class="row">
+      <!--Begin col-->
+      <div class="column">
+        <pre id="bookings"></pre>
+      </div>
+      <!--End col-->
+
+      <!--Begin col-->
+      <div class="column">
+        <div class="videowrap">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d11898.289517452584!2d-87.60853049433447!3d41.79442860243028!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x880e2912ce6f7027%3A0xc0cfb5545d4a37b2!2sHyde%20Park%2C%20Chicago%2C%20IL%2C%20USA!5e0!3m2!1sen!2spt!4v1662384760663!5m2!1sen!2spt"
+            width="600"
+            height="450"
+            style="border: 0"
+            allowfullscreen=""
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+          ></iframe>
+        </div>
+      </div>
+      <!--End col-->
+    </div>
+    <!--End row-->
+  </article>
+</section>
+<script>
+  console.log('Script starting...');
+
+  // Redirect to login if not authenticated
+  if (!localStorage.getItem('access')) {
+    console.log('No access token, redirecting to login...');
+    window.location.href = '/login/';
+  }
+
+  // Debug: Check if token exists
+  const accessToken = localStorage.getItem('access');
+  console.log('Access token:', accessToken);
+
+  if (!accessToken) {
+    document.getElementById('bookings').innerHTML = 'No access token found. Please log in.';
+    return;
+  }
+
+  fetch('{% url 'reservations' %}', {
+    headers: {
+      'Authorization': 'Bearer ' + accessToken,
+      'Content-Type': 'application/json'
+    }
+  })
+    .then(r => {
+      console.log('Response status:', r.status);
+      console.log('Response headers:', r.headers);
+      console.log('Request URL:', r.url);
+      if (!r.ok) {
+        return r.text().then(text => {
+          console.log('Error response body:', text);
+          throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+        });
+      }
+      return r.json();
+    })
+    .then(bookings => {
+      console.log('Bookings data:', bookings);
+      const pretty_json = JSON.stringify(bookings, null, 2);
+      document.getElementById('bookings').innerHTML = pretty_json;
+    })
+    .catch(error => {
+      console.error('Fetch error:', error);
+      document.getElementById('bookings').innerHTML = 'Error loading bookings: ' + error.message;
+    });
+</script>
+{% endblock %}
