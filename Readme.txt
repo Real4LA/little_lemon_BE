@@ -1,4 +1,0 @@
-/book/
-/reservations/
-/login/
-/register/
