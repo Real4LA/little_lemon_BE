@@ -78,7 +78,7 @@ A modern, responsive restaurant management system built with Django and JavaScri
 ### Step 1: Clone the Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/Real4LA/resataurent-reservation-app.git
 cd Display-the-Little-Lemon-available-booking-times-v2
 ```
 
